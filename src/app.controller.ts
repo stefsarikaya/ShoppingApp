@@ -7,9 +7,10 @@ export class AppController {
   getHello(): string {
     return 'Hello world!';
   }
-
+  /*
   @Get('world')
   getWorld(): string {
     return 'World!';
   }
+  */
 }
