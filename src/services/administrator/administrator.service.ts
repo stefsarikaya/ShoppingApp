@@ -14,7 +14,7 @@ export class AdministratorService {
     }
 
     getById(id:number): Promise<Administrator>{
-        return this.administrator.findOne({ where: { id } } as any);
+        return this.administrator.findOne({where:{id}} as any);
     }
 
 
