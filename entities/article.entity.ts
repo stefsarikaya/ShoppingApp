@@ -25,7 +25,7 @@ export class Article {
   @Column({ type:"int", name: "category_id", unsigned: true})
   categoryId: number;
 
-  @Column({ type:"int",length: 255})
+  @Column({ type:"varchar",length: 255})
   except: string;
 
   @Column({ type:"text"})
