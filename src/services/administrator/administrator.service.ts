@@ -5,6 +5,7 @@ import { AddAdministratorDto } from 'src/dtos/administrator/add.administrator.dt
 import { EditAdministratorDto } from 'src/dtos/administrator/edit.administrator.dto';
 import { ApiResponse } from 'src/misc/api.response.class';
 import { Repository } from 'typeorm';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AdministratorService {
@@ -16,12 +17,21 @@ export class AdministratorService {
         return this.administrator.find();
     }
 
+    async getByUsername(usernameString:string): Promise<Administrator | null>{
+            const admin= await this.administrator.findOne({ where: { username: usernameString }});
+
+            if (admin){
+                return admin;
+            }
+
+            return null;
+    }
+
     getById(id:number): Promise<Administrator>{
         return this.administrator.findOne({ where: { administratorId: id }});
     }
 
     add(data:AddAdministratorDto):Promise<Administrator | ApiResponse>{
-        const crypto=require('crypto');
         const passwordHash=crypto.createHash('sha512');
         passwordHash.update(data.password);
         const passwordHashString=passwordHash.digest('hex').toUpperCase();
@@ -50,7 +60,6 @@ export class AdministratorService {
             });
         }
 
-        const crypto=require('crypto');
         const passwordHash=crypto.createHash('sha512');
         passwordHash.update(data.password);
         const passwordHashString=passwordHash.digest('hex').toUpperCase();
