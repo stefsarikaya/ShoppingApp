@@ -64,8 +64,7 @@ async getArticleById(@Param('id') id: number): Promise<Article> {
 
           fileName=fileName.toLocaleLowerCase();
 
-          // prvi apramtera null jer nije bilo niakvih error?!?!?!?
-          // uglavnom ovo je nasa rucno definisana funckija koaj radi preprvaku file neme
+
           callback(null, fileName);
         }
       }),
@@ -75,7 +74,7 @@ async getArticleById(@Param('id') id: number): Promise<Article> {
               return;
         }
 
-        if (!(file.mimetype.includes('jpeg') || file.mimetype.includes('pnh'))) {
+        if (!(file.mimetype.includes('jpeg') || file.mimetype.includes('png'))) {
               callback(new Error('Bad file content!'), false)
               return;
         }
