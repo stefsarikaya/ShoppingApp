@@ -9,7 +9,7 @@ import { CategoryService } from 'src/services/category/category.service';
   },
   params: {
     id: {
-      field: 'categoryId',
+      field: 'category_id',
       type: 'number',
       primary: true,
     },
