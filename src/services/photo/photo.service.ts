@@ -1,16 +1,21 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { TypeOrmCrudService } from "@nestjsx/crud-typeorm";
 import { Photo } from "src/entities/photo.entity";
 import { Repository } from "typeorm";
 
-Injectable()
-export class PhotoService {
-  constructor(
-    @InjectRepository(Photo)
-    private readonly photo: Repository<Photo>
-) {}
+@Injectable()
+export class PhotoService extends TypeOrmCrudService<Photo> {
+  constructor(@InjectRepository(Photo) private readonly photoRepository: Repository<Photo>) {
+    super(photoRepository);
+  }
+
 
 add(newPhoto:Photo): Promise<Photo>{
-    return this.photo.save(newPhoto);
+    return this.photoRepository.save(newPhoto);
 }
+
+async deleteById(id:number){
+  return this.photoRepository.delete(id);
+  }
 }
