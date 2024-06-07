@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Request, NotFoundException, Post, Body, UseInterceptors, UploadedFile, Req, Delete } from "@nestjs/common";
+import { Controller, Get, Param, Request, NotFoundException, Post, Body, UseInterceptors, UploadedFile, Req, Delete, Patch } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Crud, CrudController, Override} from "@nestjsx/crud";
 import { Article } from "src/entities/article.entity";
@@ -14,6 +14,7 @@ import filetype from 'magic-bytes.js'
 import * as fileType from 'file-type';
 import * as fs from 'fs';
 import * as sharp from 'sharp';
+import { EditArticleDto } from "src/dtos/article/edit.article.dto";
 
 @Controller('api/article')
 export class ArticleController {
@@ -36,6 +37,13 @@ async getArticleById(@Param('id') id: number): Promise<Article> {
 
   return article;
 }
+
+  @Patch(':id')     // http://localhost:3000/api/article/4/
+  editFullArticle(@Param('id') id:number, @Body() data:EditArticleDto){
+      return this.articleService.editFullArticle(id,data);
+  }
+
+
   @Post('createFull')     // http://localhost:3000/api/article/createFull
   createFullArticle(@Body() data:AddArticleDto){
       return this.articleService.createFullArticle(data);
