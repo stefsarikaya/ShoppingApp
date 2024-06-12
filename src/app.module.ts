@@ -26,6 +26,7 @@ import { PhotoService } from './services/photo/photo.service';
 import { FeatureService } from './services/feature/feature.service';
 import { FeatureController } from './controllers/api/feature.controller';
 import { UserService } from './services/user/user.service';
+import { RoleCheckedGuard } from './misc/role.checker.guard';
 
 @Module({
   imports: [
@@ -66,7 +67,7 @@ import { UserService } from './services/user/user.service';
   controllers: [AppController, AdministratorController,CategoryController, ArticleController, AuthController,
     FeatureController],
   providers: [AdministratorService,CategoryService, ArticleService, PhotoService, FeatureService, UserService],
-  exports: [CategoryService, AdministratorService],
+  exports: [CategoryService, AdministratorService, UserService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

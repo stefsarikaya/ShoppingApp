@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Request, NotFoundException, Post, Body, UseInterceptors, UploadedFile, Req, Delete, Patch } from "@nestjs/common";
+import { Controller, Get, Param, Request, NotFoundException, Post, Body, UseInterceptors, UploadedFile, Req, Delete, Patch, UseGuards } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Crud, CrudController, Override} from "@nestjsx/crud";
 import { Article } from "src/entities/article.entity";
@@ -15,6 +15,8 @@ import * as fileType from 'file-type';
 import * as fs from 'fs';
 import * as sharp from 'sharp';
 import { EditArticleDto } from "src/dtos/article/edit.article.dto";
+import { RoleCheckedGuard } from "src/misc/role.checker.guard";
+import { AllowToRoles } from "src/misc/allow.to.roles.descriptor";
 
 @Controller('api/article')
 export class ArticleController {
@@ -39,18 +41,22 @@ async getArticleById(@Param('id') id: number): Promise<Article> {
 }
 
   @Patch(':id')     // http://localhost:3000/api/article/4/
+  @UseGuards(RoleCheckedGuard)
+  @AllowToRoles('administrator')
   editFullArticle(@Param('id') id:number, @Body() data:EditArticleDto){
       return this.articleService.editFullArticle(id,data);
   }
 
-
   @Post('createFull')     // http://localhost:3000/api/article/createFull
+  @UseGuards(RoleCheckedGuard)
+  @AllowToRoles('administrator')
   createFullArticle(@Body() data:AddArticleDto){
       return this.articleService.createFullArticle(data);
   }
 
-
   @Post(':id/uploadPhoto/')               // http://localhost:3000/api/article/:id/uploadPhoto/
+  @UseGuards(RoleCheckedGuard)
+  @AllowToRoles('administrator')
   @UseInterceptors(
     FileInterceptor('photo', {
       storage:diskStorage({
@@ -159,6 +165,8 @@ async getArticleById(@Param('id') id: number): Promise<Article> {
 
   // http://localhost:3000/api/article/1/deletePhoto/45/
   @Delete(':articleId/deletePhoto/:photoId')
+  @UseGuards(RoleCheckedGuard)
+  @AllowToRoles('administrator')
    public async deletePhoto(
     @Param('articleId') articleId:number,
     @Param('photoId') photoId:number

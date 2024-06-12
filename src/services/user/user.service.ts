@@ -39,4 +39,22 @@ export class UserService extends TypeOrmCrudService<User> {
       return new ApiResponse('error', -6001, 'This user account cannot be crated.')
     }
   }
+  /*
+  async getById(id){
+    return await this.userRepository.findOne(id);
+  }
+  */
+  getById(id:number): Promise<User>{
+    return this.userRepository.findOne({ where: { userId: id }});
+}
+
+  async getByEmail(email:string): Promise<User | null>{
+    const user= await this.userRepository.findOne({ where: { email: email }});
+
+    if (user){
+        return user;
+    }
+
+    return null;
+}
 }
