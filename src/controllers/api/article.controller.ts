@@ -25,11 +25,15 @@ export class ArticleController {
   ) {}
 
 @Get()
+@UseGuards(RoleCheckedGuard)
+@AllowToRoles('administrator','user')
 async getArticles(): Promise<Article[]> {
   return this.articleService.findAll();
 }
 
 @Get(':id')
+@UseGuards(RoleCheckedGuard)
+@AllowToRoles('administrator','user')
 async getArticleById(@Param('id') id: number): Promise<Article> {
   const article = await this.articleService.findOneById(id);
 
@@ -47,7 +51,7 @@ async getArticleById(@Param('id') id: number): Promise<Article> {
       return this.articleService.editFullArticle(id,data);
   }
 
-  @Post('createFull')     // http://localhost:3000/api/article/createFull
+  @Post()     // http://localhost:3000/api/article/
   @UseGuards(RoleCheckedGuard)
   @AllowToRoles('administrator')
   createFullArticle(@Body() data:AddArticleDto){
