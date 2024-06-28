@@ -10,9 +10,7 @@ import { Repository } from "typeorm";
 export class CardService {
     constructor(
         @InjectRepository(Card) private readonly card:Repository<Card>,
-        @InjectRepository(CardArticle) private readonly cardArticle:Repository<CardArticle>,
-        @InjectRepository(Article) private readonly article:Repository<Article>,
-        @InjectRepository(Order) private readonly order:Repository<Order>,
+        @InjectRepository(CardArticle) private readonly cardArticle:Repository<CardArticle>
     ){}
 
     async getLastActiveCardByUserId(userId:number):Promise<Card|null>{
@@ -69,6 +67,7 @@ export class CardService {
                 "cardArticles",
                 "cardArticles.article",
                 "cardArticles.article.category",
+                "cardArticles.article.articlePrices"
             ],
         });
     }
