@@ -3,14 +3,19 @@ import { Request } from "express";
 import { AddArticleToCardDto } from "src/dtos/card/add.article.to.card.dto";
 import { EditArticleInCardDto } from "src/dtos/card/edit.article.card.dto";
 import { Card } from "src/entities/card.entity";
+import { Order } from "src/entities/order.entity";
 import { AllowToRoles } from "src/misc/allow.to.roles.descriptor";
+import { ApiResponse } from "src/misc/api.response.class";
 import { RoleCheckedGuard } from "src/misc/role.checker.guard";
 import { CardService } from "src/services/card/card.service";
+import { OrderService } from "src/services/order/order.service";
 
 @Controller('api/user/card')
 export class UserCardController{
     constructor(
-        private cardService:CardService){}
+        private cardService:CardService,
+        private orderService:OrderService)
+      {}
 
       private async getActiveCardForUserId(userId:number): Promise<Card> {
         let card= await this.cardService.getLastActiveCardByUserId(userId);
@@ -48,4 +53,13 @@ export class UserCardController{
           return await this.cardService.changeQuantity(card.cardId, data.articleId, data.quantity);
       }
 
+      // http://localhost:3000/api/user/card/makeOrder/
+      @Post('makeOrder')
+      @UseGuards(RoleCheckedGuard)
+      @AllowToRoles('user')
+      async makeOrder(@Req() req:Request):Promise<Order|ApiResponse>{
+          const card= await this.getActiveCardForUserId(req.token.id);
+          return await this.orderService.add(card.cardId)
+        }
+        
     }
