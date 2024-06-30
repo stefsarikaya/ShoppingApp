@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Card } from "./card.entity";
+import * as Validator from 'class-validator';
 
 @Index("uk_order_card_id", ["cardId"], { unique: true })
 @Entity("order")
@@ -30,6 +31,9 @@ export class Order {
     enum: ["rejected", "accepted", "shipped", "pending"],
     default: () => "'pending'",
   })
+  @Validator.IsNotEmpty()
+  @Validator.IsString()
+  @Validator.IsIn(["rejected", "accepted", "shipped", "pending"])
   status: "rejected" | "accepted" | "shipped" | "pending";
 
   @OneToOne(() => Card, (card) => card.order, {

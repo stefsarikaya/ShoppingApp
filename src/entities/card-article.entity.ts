@@ -8,6 +8,7 @@ import {
 } from "typeorm";
 import { Article } from "./article.entity";
 import { Card } from "./card.entity";
+import * as Validator from 'class-validator';
 
 @Index("card_article_id_article_id", ["articleId"], {})
 @Index("uk_card_article_id_card_id_article_id", ["cardId", "articleId"], {
@@ -29,6 +30,13 @@ export class CardArticle {
   articleId: number;
 
   @Column({type:"int", unsigned: true})
+  @Validator.IsNotEmpty()
+  @Validator.IsPositive()
+  @Validator.IsNumber({
+    allowInfinity:false,
+    allowNaN:false,
+    maxDecimalPlaces:0
+  })
   quantity: number;
 
   @ManyToOne(() => Article, (article) => article.cardArticles, {
