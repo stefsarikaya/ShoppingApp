@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Request, NotFoundException, Post, Body, UseInterceptors, UploadedFile, Req, Delete, Patch, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, Request, NotFoundException, Post, Body, UseInterceptors, UploadedFile, Req, Delete, Patch, UseGuards, Query } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Crud, CrudController, Override} from "@nestjsx/crud";
 import { Article } from "src/entities/article.entity";
@@ -17,19 +17,50 @@ import * as sharp from 'sharp';
 import { EditArticleDto } from "src/dtos/article/edit.article.dto";
 import { RoleCheckedGuard } from "src/misc/role.checker.guard";
 import { AllowToRoles } from "src/misc/allow.to.roles.descriptor";
+import { ArticleSearchDto } from "src/dtos/article/article.search.dto";
 
 @Controller('api/article')
 export class ArticleController {
   constructor(private readonly articleService: ArticleService,
               private readonly photoService: PhotoService
   ) {}
-
+/*
 @Get()
 @UseGuards(RoleCheckedGuard)
 @AllowToRoles('administrator','user')
 async getArticles(): Promise<Article[]> {
   return this.articleService.findAll();
 }
+*/
+  
+//početak
+
+@Get()
+@UseGuards(RoleCheckedGuard)
+@AllowToRoles('administrator', 'user')
+async getArticles(@Query('filter') filter: string): Promise<Article[]> {
+  if (filter) {
+    const parsedFilter = this.parseFilter(filter);
+    return this.articleService.findByFilter(parsedFilter);
+  }
+
+  return this.articleService.findAll();
+}
+
+// Privatna metoda za parsiranje filtera
+private parseFilter(filter: string): any {
+  const filterParts = filter.split('||').map(part => part.trim());
+  const filterObject: any = {};
+
+  if (filterParts.length === 3 && filterParts[1] === '$eq') {
+    filterObject[filterParts[0]] = filterParts[2];
+  }
+
+  return filterObject;
+}
+
+//kraj
+
 
 @Get(':id')
 @UseGuards(RoleCheckedGuard)
@@ -196,4 +227,12 @@ async getArticleById(@Param('id') id: number): Promise<Article> {
 
     return new ApiResponse('ok', 0, 'One photo deleted!');
   }
+
+  @Post('search')
+  @UseGuards(RoleCheckedGuard)
+  @AllowToRoles('administrator','user')
+  async search(@Body () data:ArticleSearchDto):Promise<Article[]> {
+      return await this.articleService.search(data);
+  }
+
 }

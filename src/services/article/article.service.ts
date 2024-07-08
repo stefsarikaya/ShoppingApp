@@ -7,8 +7,9 @@ import { ArticlePrice } from "src/entities/article-price.entity";
 import { Article } from "src/entities/article.entity";
 import { AddArticleDto } from "src/dtos/article/add.article.dto";
 import { ApiResponse } from "src/misc/api.response.class";
-import { Repository } from "typeorm";
+import { Any, Brackets, In, Repository } from "typeorm";
 import { EditArticleDto } from "src/dtos/article/edit.article.dto";
+import { ArticleSearchDto } from "src/dtos/article/article.search.dto";
 
 @Injectable()
 export class ArticleService {
@@ -136,4 +137,102 @@ export class ArticleService {
           }}
         );
   }
+
+  async findByFilter(filter: any): Promise<Article[]> {
+    const queryBuilder = this.article
+      .createQueryBuilder('article')
+      .leftJoinAndSelect('article.category', 'category')
+      .leftJoinAndSelect('article.photos', 'photo')
+      .leftJoinAndSelect('article.articlePrices', 'articlePrice')
+      .leftJoinAndSelect('article.articleFeatures', 'articleFeature')
+      .leftJoinAndSelect('articleFeature.feature', 'feature');
+  
+    if (filter.categoryId) {
+      queryBuilder.andWhere('article.categoryId = :categoryId', { categoryId: filter.categoryId });
+    }
+  
+    return await queryBuilder.getMany();
+  }
+
+  async search(data: ArticleSearchDto): Promise<Article[]> {
+    const builder= await this.article.createQueryBuilder("article");
+    builder.innerJoinAndSelect("article.articlePrices",
+            "ap",
+            "ap.created_at=(SELECT MAX(ap.createdAt) FROM article_price AS ap WHERE ap.article_id=article.article_id)"
+              );
+    builder.leftJoin("article.articleFeatures","af");
+    builder.where('article.categoryId=:id',{id:data.categoryId});
+                                           
+    if (data.keywords && data.keywords.length > 0) {
+      builder.andWhere(
+          new Brackets(qb => {
+              qb.where('article.name LIKE :kw', { kw: '%' + data.keywords.trim() + '%' })
+                .orWhere('article.except LIKE :kw', { kw: '%' + data.keywords.trim() + '%' })
+                .orWhere('article.description LIKE :kw', { kw: '%' + data.keywords.trim() + '%' });
+          })
+      );
+  }
+  
+
+    if (data.priceMin && typeof data.priceMin==='number'){
+      builder.andWhere('ap.price >= :min', {min:data.priceMin});
+    }
+    if (data.priceMax && typeof data.priceMax==='number'){
+      builder.andWhere('ap.price <= :max', {max:data.priceMax});
+    }
+    if (data.features && data.features.length>0){
+      for (const feature of data.features){
+          builder.andWhere('af.featureId = :fId AND af.value IN (:fVals)', 
+            {
+              fId:feature.featureId,
+              fVals:feature.values,
+            });
+          }
+      }
+
+let orderBy = 'article.name'; // Podrazumevana vrednost
+if (data.orderBy) {
+    if (data.orderBy === 'price') {
+        orderBy = 'ap.price'; // Sortiranje po ceni iz povezane tabele `articlePrices`
+    } else {
+        orderBy = `article.${data.orderBy}`; // Sortiranje po drugim validnim kolonama
+    }
+}
+
+let orderDirection: 'ASC' | 'DESC' = 'ASC';
+if (data.orderDirection) {
+    orderDirection = data.orderDirection;
+}
+      
+    builder.orderBy(orderBy,orderDirection);
+
+    let page=0;
+    let perPage:5|10|25|50|75=25;
+
+    if (data.page && typeof data.page==='number') {
+          page=data.page;
+    }
+
+    if (data.itemsPerPage && typeof data.itemsPerPage==='number') {
+        perPage=data.itemsPerPage;
+    }
+
+    builder.skip(page*perPage);
+    builder.take(perPage);
+      
+    let articleIds= (await builder.getMany()).map(article => article.articleId);
+
+    return await this.article.find({
+      where: {
+        articleId: In(articleIds)
+      },
+      relations: [
+        "category",
+        "articleFeatures",
+        "features",
+        "articlePrices",
+        "photos"
+      ]
+    });
+  }  
 }
