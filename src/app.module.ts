@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { AppController } from './controllers/app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseConfigurataion } from 'config/DatabaseConfigurataion'; 
@@ -30,6 +30,9 @@ import { RoleCheckedGuard } from './misc/role.checker.guard';
 import { CardService } from './services/card/card.service';
 import { UserCardController } from './controllers/api/user.card.controller';
 import { OrderService } from './services/order/order.service';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { MailConfig } from 'config/mail.config';
+import { OrderMailer } from './services/order/order.mailer.service';
 
 @Module({
   imports: [
@@ -65,12 +68,20 @@ import { OrderService } from './services/order/order.service';
       Feature,
       Order,
       Photo,
-      User,])
+      User,]),
+      MailerModule.forRoot({
+        transport:'smtps://'+MailConfig.username+':'+
+                             MailConfig.password+'@'+
+                             MailConfig.hostname,
+        defaults:{
+          from:MailConfig.senderEmail
+        }
+      }),
   ],
   controllers: [AppController, AdministratorController,CategoryController, ArticleController, AuthController,
     FeatureController, UserCardController],
   providers: [AdministratorService,CategoryService, ArticleService, PhotoService, 
-    FeatureService, UserService, CardService, OrderService],
+    FeatureService, UserService, CardService, OrderService, OrderMailer],
   exports: [CategoryService, AdministratorService, UserService],
 })
 export class AppModule implements NestModule {

@@ -1,3 +1,5 @@
+
+
 import { HttpException, HttpStatus, Injectable, NestMiddleware } from "@nestjs/common";
 import { NextFunction, Request, Response } from "express";
 import { AdministratorService } from "src/services/administrator/administrator.service";
@@ -42,10 +44,10 @@ export class AuthMiddleware implements NestMiddleware{
         if (jwtData.ip !== req.ip.toString()) {
             throw new HttpException('Bad token found',HttpStatus.UNAUTHORIZED);
         }
-
+        /* Uklanjanje provere user-agent
         if (jwtData.ua !== req.headers["user-agent"] ) {
             throw new HttpException('Bad token found',HttpStatus.UNAUTHORIZED);
-        }
+        } */
 
         if (jwtData.role==="administrator") {
             const administrator= await this.administratorService.getById(jwtData.id);
