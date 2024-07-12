@@ -32,7 +32,7 @@ export class UserCardController{
       // http://localhost:3000/api/user/card
       @Get()
       @UseGuards(RoleCheckedGuard)
-      @AllowToRoles('user','administrator')
+      @AllowToRoles('user')
       async getCurrentCard(@Req() req:Request): Promise<Card> {
         return await this.getActiveCardForUserId(req.token.id);
       }
@@ -40,7 +40,7 @@ export class UserCardController{
       // http://localhost:3000/api/user/card/addToCard
       @Post('addToCard')
       @UseGuards(RoleCheckedGuard)
-      @AllowToRoles('user', 'administrator')
+      @AllowToRoles('user')
       async addToCard(@Body() data:AddArticleToCardDto, @Req() req:Request):Promise<Card> {
           const card= await this.getActiveCardForUserId(req.token.id);
           return await this.cardService.addArticleToCard(card.cardId, data.articleId, data.quantity);
@@ -49,7 +49,7 @@ export class UserCardController{
       // http://localhost:3000/api/user/card/
       @Patch()
       @UseGuards(RoleCheckedGuard)
-      @AllowToRoles('user', 'administrator')
+      @AllowToRoles('user')
       async changeQuantity(@Body() data:EditArticleInCardDto, @Req() req:Request):Promise<Card>{
           const card= await this.getActiveCardForUserId(req.token.id);
           return await this.cardService.changeQuantity(card.cardId, data.articleId, data.quantity);
@@ -58,7 +58,7 @@ export class UserCardController{
       // http://localhost:3000/api/user/card/makeOrder/
       @Post('makeOrder')
       @UseGuards(RoleCheckedGuard)
-      @AllowToRoles('user', 'administrator')
+      @AllowToRoles('user')
       async makeOrder(@Req() req:Request):Promise<Order|ApiResponse>{
           const card= await this.getActiveCardForUserId(req.token.id);
           const order= await this.orderService.add(card.cardId);
